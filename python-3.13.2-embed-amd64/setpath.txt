@@ -1,0 +1,19 @@
+@echo off
+
+:: get current Path variable from registry (user)
+for /F "usebackq tokens=1,2,*" %%a in (`reg query HKCU\Environment /v Path`) do (
+    set "current=%%c"
+)
+
+:: prepend stuff, in this case "F:\bin;"
+set prepend=F:\bin;
+set "current=%prepend%%current%"
+
+:: create a backup, just in case
+reg export HKCU\Environment %TMP%\~env_backup.reg /y
+
+:: overwrite current Path in registry (user) with extended version
+reg add HKCU\Environment /v Path /t REG_EXPAND_SZ /d "%current%" /f >nul
+
+:: prepend the same stuff also for the current CMD session
+set "Path=%prepend%%Path%"
